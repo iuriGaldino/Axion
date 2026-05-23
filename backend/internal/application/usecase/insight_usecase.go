@@ -22,9 +22,13 @@ func (u *InsightUseCase) GetFinancialInsight(ctx context.Context, userID string)
 		return "", err
 	}
 
-	data := "Transações recentes: "
+	if len(transactions) == 0 {
+		return "Ainda não tenho dados suficientes para gerar insights. Comece adicionando algumas transações!", nil
+	}
+
+	data := "Histórico de Transações do Usuário: "
 	for _, t := range transactions {
-		data += fmt.Sprintf("%.2f em %s; ", t.Amount, t.Description)
+		data += fmt.Sprintf("Valor: %.2f, Descrição: %s, Tipo: %s; ", t.Amount, t.Description, t.Type)
 	}
 
 	return u.aiService.GenerateInsight(ctx, data)

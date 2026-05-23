@@ -1,19 +1,26 @@
+-- Extension for UUID
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- Users table
 CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    avatar VARCHAR(255),
+    language VARCHAR(10) DEFAULT 'pt-BR',
+    theme VARCHAR(20) DEFAULT 'system',
+    accent_color VARCHAR(20),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Accounts table (Bank accounts, Wallets, etc.)
+-- Accounts table
 CREATE TABLE accounts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
-    type VARCHAR(50) NOT NULL, -- 'checking', 'savings', 'credit_card', 'cash'
+    type VARCHAR(50) NOT NULL,
     balance DECIMAL(15, 2) DEFAULT 0.00,
     currency VARCHAR(3) DEFAULT 'BRL',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -22,7 +29,7 @@ CREATE TABLE accounts (
 
 -- Categories table
 CREATE TABLE categories (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     icon VARCHAR(50),
@@ -33,14 +40,14 @@ CREATE TABLE categories (
 
 -- Transactions table
 CREATE TABLE transactions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     account_id UUID REFERENCES accounts(id) ON DELETE CASCADE,
     category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
     amount DECIMAL(15, 2) NOT NULL,
     description TEXT,
     date DATE NOT NULL,
-    type VARCHAR(20) NOT NULL, -- 'income', 'expense', 'transfer'
+    type VARCHAR(20) NOT NULL,
     is_confirmed BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -48,7 +55,7 @@ CREATE TABLE transactions (
 
 -- Budgets table
 CREATE TABLE budgets (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     category_id UUID REFERENCES categories(id) ON DELETE CASCADE,
     amount DECIMAL(15, 2) NOT NULL,
@@ -60,7 +67,7 @@ CREATE TABLE budgets (
 
 -- Goals table
 CREATE TABLE goals (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     target_amount DECIMAL(15, 2) NOT NULL,
@@ -70,9 +77,6 @@ CREATE TABLE goals (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indices for performance
+-- Indices
 CREATE INDEX idx_transactions_user_id ON transactions(user_id);
-CREATE INDEX idx_transactions_account_id ON transactions(account_id);
-CREATE INDEX idx_transactions_date ON transactions(date);
 CREATE INDEX idx_accounts_user_id ON accounts(user_id);
-CREATE INDEX idx_budgets_user_id ON budgets(user_id);

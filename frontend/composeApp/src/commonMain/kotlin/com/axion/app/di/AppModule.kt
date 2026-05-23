@@ -1,5 +1,8 @@
 package com.axion.app.di
 
+import com.axion.app.data.repository.FinanceRepositoryImpl
+import com.axion.app.domain.repository.FinanceRepository
+import com.axion.app.ui.screens.dashboard.DashboardViewModel
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
@@ -17,4 +20,6 @@ val appModule = module {
             }
         }
     }
+    single<FinanceRepository> { FinanceRepositoryImpl(get()) }
+    factory { DashboardViewModel(get()) }
 }

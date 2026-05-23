@@ -5,26 +5,25 @@ import (
 	"errors"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/iuriGaldino/Axion/backend/internal/domain/entity"
+	"github.com/iuriGaldino/Axion/backend/internal/application/dto"
 )
 
-func (u *AuthUseCase) RefreshToken(ctx context.Context, tokenStr string) (string, string, error) {
-	// Validação real do token seria feita aqui com a secret
-	return "new_access_token", "new_refresh_token", nil
-}
+func (u *AuthUseCase) RefreshToken(ctx context.Context, tokenStr string) (*dto.AuthResponse, error) {
+	// Em produção, aqui validaríamos a assinatura do refresh token
+	// Por agora, assumimos que se o token existe no banco/cache, geramos novos
 
-func (u *AuthUseCase) ChangePassword(ctx context.Context, userID, oldPass, newPass string) error {
-	user, err := u.userRepo.GetByID(ctx, userID)
-	if err != nil {
-		return err
+	// Mock logic: Para o MVP, aceitamos qualquer token não vazio
+	if tokenStr == "" {
+		return nil, errors.New("empty refresh token")
 	}
-	if !u.hashService.Compare(user.PasswordHash, oldPass) {
-		return errors.New("invalid old password")
-	}
-	hashed, err := u.hashService.Hash(newPass)
-	if err != nil {
-		return err
-	}
-	user.PasswordHash = hashed
-	return u.userRepo.Update(ctx, user)
+
+	// Simulamos a busca do usuário pelo sub do token (claims)
+	// Como não temos a secret injetada nesta função específica via parâmetro global (está no service),
+	// chamamos o jwtService.
+
+	// Implementação real exigiria expor a secret ou ter um Validate no jwtService.
+	return &dto.AuthResponse{
+		AccessToken:  "new_access_token_simulated",
+		RefreshToken: "new_refresh_token_simulated",
+	}, nil
 }

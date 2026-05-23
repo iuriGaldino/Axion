@@ -51,7 +51,11 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET}
+<<<<<<< HEAD
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+=======
       OLLAMA_URL: ${OLLAMA_URL}
+>>>>>>> origin/main
     depends_on:
       - db
       - redis
@@ -64,7 +68,12 @@ services:
     image: prom/prometheus:v2.45.0
     container_name: axion-prometheus
     volumes:
+<<<<<<< HEAD
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./infrastructure/monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml
+=======
       - ./infrastructure/monitoring:/etc/prometheus
+>>>>>>> origin/main
     ports:
       - "9090:9090"
 
