@@ -1,6 +1,20 @@
 version: '3.8'
 
 services:
+  traefik:
+    image: traefik:v2.10
+    container_name: axion-traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8081:8080" # Dashboard Traefik
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
   db:
     image: postgres:15-alpine
     container_name: axion-db
@@ -28,8 +42,6 @@ services:
       dockerfile: Dockerfile
     container_name: axion-backend
     restart: always
-    ports:
-      - "${API_PORT:-8080}:8080"
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -42,6 +54,34 @@ services:
     depends_on:
       - db
       - redis
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: axion-prometheus
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: axion-grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  loki:
+    image: grafana/loki:2.8.2
+    container_name: axion-loki
+    volumes:
+      - ./infrastructure/monitoring/loki-config.yaml:/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
 
 volumes:
   postgres_data:

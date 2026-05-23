@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/iuriGaldino/Axion/backend/internal/application/usecase"
 	"github.com/iuriGaldino/Axion/backend/internal/infrastructure/persistence/postgres"
@@ -45,8 +45,13 @@ func main() {
 		AppName: "Axion API",
 	})
 
-	app.Use(logger.New())
+	middleware.InitLogger()
+	app.Use(middleware.StructuredLogger())
 	app.Use(recover.New())
+
+	prometheus := fiberprometheus.New("axion-api")
+	prometheus.RegisterAt(app, "/metrics")
+	app.Use(prometheus.Middleware)
 
 	// Services
 	hashService := security.NewArgon2idHasher()

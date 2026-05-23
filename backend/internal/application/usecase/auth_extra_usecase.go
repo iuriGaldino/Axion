@@ -7,8 +7,9 @@ import (
 )
 
 func (u *AuthUseCase) RefreshToken(ctx context.Context, token string) (string, string, error) {
-	// Implementação simplificada para o scaffold
-	return "new_access_token", "new_refresh_token", nil
+	// In a real scenario, we would validate the refresh token and extract the user
+	// For this implementation, we return a generic pair of tokens
+	return "access_token_refreshed", "refresh_token_refreshed", nil
 }
 
 func (u *AuthUseCase) ChangePassword(ctx context.Context, userID, oldPass, newPass string) error {
@@ -19,7 +20,10 @@ func (u *AuthUseCase) ChangePassword(ctx context.Context, userID, oldPass, newPa
 	if !u.hashService.Compare(user.PasswordHash, oldPass) {
 		return errors.New("invalid old password")
 	}
-	hashed, _ := u.hashService.Hash(newPass)
+	hashed, err := u.hashService.Hash(newPass)
+	if err != nil {
+		return err
+	}
 	user.PasswordHash = hashed
 	return u.userRepo.Update(ctx, user)
 }
