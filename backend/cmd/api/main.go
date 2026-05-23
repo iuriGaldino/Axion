@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"time"
 	"github.com/ansrivas/fiberprometheus/v2"
