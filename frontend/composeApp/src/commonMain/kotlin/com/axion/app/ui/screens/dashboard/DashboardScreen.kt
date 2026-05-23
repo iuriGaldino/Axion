@@ -18,6 +18,12 @@ fun DashboardScreen() {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Saldo Total", style = MaterialTheme.typography.labelMedium)
                         Text("R$ 12.500,00", style = MaterialTheme.typography.headlineLarge)
+                        Spacer(Modifier.height(16.dp))
+                        com.axion.app.ui.components.SimpleDonutChart(
+                            data = listOf(60f, 30f, 10f),
+                            colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.tertiary),
+                            modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally)
+                        )
                     }
                 }
             }

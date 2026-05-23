@@ -2,7 +2,10 @@ package com.axion.app
 
 import androidx.compose.runtime.*
 import com.axion.app.ui.screens.auth.LoginScreen
+import com.axion.app.ui.screens.auth.RegisterScreen
 import com.axion.app.ui.screens.dashboard.DashboardScreen
+import com.axion.app.ui.screens.profile.ProfileScreen
+import com.axion.app.ui.screens.profile.SettingsScreen
 import com.axion.app.ui.theme.AxionTheme
 
 enum class Screen {
