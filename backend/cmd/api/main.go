@@ -10,6 +10,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/iuriGaldino/Axion/backend/internal/application/usecase"
+	"github.com/iuriGaldino/Axion/backend/internal/infrastructure/ai"
+	"github.com/iuriGaldino/Axion/backend/internal/infrastructure/ocr"
 	"github.com/iuriGaldino/Axion/backend/internal/infrastructure/persistence/postgres"
 	"github.com/iuriGaldino/Axion/backend/internal/infrastructure/security"
 	"github.com/iuriGaldino/Axion/backend/internal/interface/api/handler"
@@ -56,6 +58,8 @@ func main() {
 	// Services
 	hashService := security.NewArgon2idHasher()
 	jwtService := security.NewJWTService(os.Getenv("JWT_SECRET"))
+	aiService := ai.NewOllamaClient()
+	ocrService := ocr.NewTesseractOCR()
 
 	// Repositories
 	userRepo := postgres.NewPostgresUserRepository(db)
@@ -70,6 +74,7 @@ func main() {
 	categoryUseCase := usecase.NewCategoryUseCase(categoryRepo)
 	transactionUseCase := usecase.NewTransactionUseCase(transactionRepo)
 	budgetGoalUseCase := usecase.NewBudgetGoalUseCase(budgetRepo, goalRepo)
+	insightUseCase := usecase.NewInsightUseCase(aiService, transactionRepo)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authUseCase)
@@ -77,6 +82,8 @@ func main() {
 	categoryHandler := handler.NewCategoryHandler(categoryUseCase)
 	transactionHandler := handler.NewTransactionHandler(transactionUseCase)
 	budgetGoalHandler := handler.NewBudgetGoalHandler(budgetGoalUseCase)
+	insightHandler := handler.NewInsightHandler(insightUseCase)
+	ocrHandler := handler.NewOCRHandler(ocrService)
 
 	// Routes
 	api := app.Group("/api")
@@ -103,6 +110,9 @@ func main() {
 	users := v1.Group("/users")
 	users.Get("/profile", userHandler.GetProfile)
 	users.Put("/profile", userHandler.UpdateProfile)
+
+	v1.Get("/insights", insightHandler.GetInsight)
+	v1.Post("/ocr", ocrHandler.ProcessReceipt)
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "up"})
