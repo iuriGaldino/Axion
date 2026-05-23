@@ -38,9 +38,8 @@ func NewAuthUseCase(
 }
 
 func (u *AuthUseCase) Register(ctx context.Context, req dto.RegisterRequest) (*dto.AuthResponse, error) {
-	// Check if user exists
-	existing, _ := u.userRepo.GetByEmail(ctx, req.Email)
-	if existing != nil {
+	existing, err := u.userRepo.GetByEmail(ctx, req.Email)
+	if err == nil && existing != nil {
 		return nil, errors.New("user already exists")
 	}
 

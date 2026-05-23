@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/iuriGaldino/Axion/backend/internal/domain/entity"
 )
 
-func (u *AuthUseCase) RefreshToken(ctx context.Context, token string) (string, string, error) {
-	// In a real scenario, we would validate the refresh token and extract the user
-	// For this implementation, we return a generic pair of tokens
-	return "access_token_refreshed", "refresh_token_refreshed", nil
+func (u *AuthUseCase) RefreshToken(ctx context.Context, tokenStr string) (string, string, error) {
+	// Validação real do token seria feita aqui com a secret
+	return "new_access_token", "new_refresh_token", nil
 }
 
 func (u *AuthUseCase) ChangePassword(ctx context.Context, userID, oldPass, newPass string) error {

@@ -1,0 +1,21 @@
+# Go
+backend/main
+backend/coverage.out
+backend/vendor/
+
+# Gradle
+.gradle/
+build/
+frontend/build/
+frontend/.gradle/
+local.properties
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# ENV
+.env
