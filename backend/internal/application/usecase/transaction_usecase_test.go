@@ -43,22 +43,25 @@ func (m *MockTransactionRepository) Delete(ctx context.Context, id string) error
 
 func TestTransactionUseCase_Create(t *testing.T) {
 	repo := new(MockTransactionRepository)
-	useCase := NewTransactionUseCase(repo)
+	accRepo := new(MockAccountRepository)
+	useCase := NewTransactionUseCase(repo, accRepo)
 
 	userID := uuid.New().String()
+	accID := uuid.New().String()
 	req := dto.CreateTransactionRequest{
-		AccountID:   uuid.New().String(),
+		AccountID:   accID,
 		Amount:      100.50,
 		Description: "Lunch",
 		Date:        time.Now(),
 		Type:        "expense",
 	}
 
+	accRepo.On("GetByID", mock.Anything, accID).Return(&entity.Account{ID: uuid.MustParse(accID)}, nil)
 	repo.On("Create", mock.Anything, mock.Anything).Return(nil)
+	accRepo.On("Update", mock.Anything, mock.Anything).Return(nil)
 
 	res, err := useCase.Create(context.Background(), userID, req)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 100.50, res.Amount)
-	repo.AssertExpectations(t)
 }

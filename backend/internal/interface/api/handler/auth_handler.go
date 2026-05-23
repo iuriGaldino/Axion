@@ -46,3 +46,17 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(res)
 }
+
+func (h *AuthHandler) Refresh(c *fiber.Ctx) error {
+	var req dto.RefreshRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "invalid request body"})
+	}
+
+	res, err := h.authUseCase.RefreshToken(c.Context(), req.RefreshToken)
+	if err != nil {
+		return c.Status(401).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(200).JSON(res)
+}

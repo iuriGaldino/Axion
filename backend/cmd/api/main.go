@@ -6,8 +6,11 @@ import (
 	"log"
 	"os"
 
+	"time"
 	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/helmet"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/iuriGaldino/Axion/backend/internal/application/usecase"
 	"github.com/iuriGaldino/Axion/backend/internal/infrastructure/ai"
@@ -50,6 +53,7 @@ func main() {
 	middleware.InitLogger()
 	app.Use(middleware.StructuredLogger())
 	app.Use(recover.New())
+	app.Use(helmet.New())
 
 	prometheus := fiberprometheus.New("axion-api")
 	prometheus.RegisterAt(app, "/metrics")
@@ -63,6 +67,7 @@ func main() {
 
 	// Repositories
 	userRepo := postgres.NewPostgresUserRepository(db)
+	accountRepo := postgres.NewPostgresAccountRepository(db)
 	categoryRepo := postgres.NewPostgresCategoryRepository(db)
 	transactionRepo := postgres.NewPostgresTransactionRepository(db)
 	budgetRepo := postgres.NewPostgresBudgetRepository(db)
@@ -71,17 +76,21 @@ func main() {
 	// Use Cases
 	authUseCase := usecase.NewAuthUseCase(userRepo, hashService, jwtService)
 	userUseCase := usecase.NewUserUseCase(userRepo)
+	accountUseCase := usecase.NewAccountUseCase(accountRepo)
 	categoryUseCase := usecase.NewCategoryUseCase(categoryRepo)
-	transactionUseCase := usecase.NewTransactionUseCase(transactionRepo)
+	transactionUseCase := usecase.NewTransactionUseCase(transactionRepo, accountRepo)
 	budgetGoalUseCase := usecase.NewBudgetGoalUseCase(budgetRepo, goalRepo)
+	budgetUseCase := usecase.NewBudgetUseCase(budgetRepo, transactionRepo)
 	insightUseCase := usecase.NewInsightUseCase(aiService, transactionRepo)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(authUseCase)
 	userHandler := handler.NewUserHandler(userUseCase)
+	accountHandler := handler.NewAccountHandler(accountUseCase)
 	categoryHandler := handler.NewCategoryHandler(categoryUseCase)
 	transactionHandler := handler.NewTransactionHandler(transactionUseCase)
 	budgetGoalHandler := handler.NewBudgetGoalHandler(budgetGoalUseCase)
+	budgetHandler := handler.NewBudgetHandler(budgetUseCase)
 	insightHandler := handler.NewInsightHandler(insightUseCase)
 	ocrHandler := handler.NewOCRHandler(ocrService)
 
@@ -89,9 +98,13 @@ func main() {
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
 
-	auth := v1.Group("/auth")
+	auth := v1.Group("/auth", limiter.New(limiter.Config{
+		Max:        5,
+		Expiration: 5 * time.Minute,
+	}))
 	auth.Post("/register", authHandler.Register)
 	auth.Post("/login", authHandler.Login)
+	auth.Post("/refresh", authHandler.Refresh)
 
 	v1.Use(middleware.AuthMiddleware(os.Getenv("JWT_SECRET")))
 
@@ -110,6 +123,14 @@ func main() {
 	users := v1.Group("/users")
 	users.Get("/profile", userHandler.GetProfile)
 	users.Put("/profile", userHandler.UpdateProfile)
+
+	accounts := v1.Group("/accounts")
+	accounts.Post("/", accountHandler.Create)
+	accounts.Get("/", accountHandler.List)
+
+	budgets := v1.Group("/budgets")
+	budgets.Post("/", budgetHandler.Create)
+	budgets.Get("/monitor", budgetHandler.Monitor)
 
 	v1.Get("/insights", insightHandler.GetInsight)
 	v1.Post("/ocr", ocrHandler.ProcessReceipt)

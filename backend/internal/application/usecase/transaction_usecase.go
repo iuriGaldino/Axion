@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/iuriGaldino/Axion/backend/internal/application/dto"
@@ -10,22 +11,25 @@ import (
 )
 
 type TransactionUseCase struct {
-	repo repository.TransactionRepository
+	repo        repository.TransactionRepository
+	accountRepo repository.AccountRepository
 }
 
-func NewTransactionUseCase(repo repository.TransactionRepository) *TransactionUseCase {
-	return &TransactionUseCase{repo: repo}
+func NewTransactionUseCase(repo repository.TransactionRepository, accountRepo repository.AccountRepository) *TransactionUseCase {
+	return &TransactionUseCase{repo: repo, accountRepo: accountRepo}
 }
 
 func (u *TransactionUseCase) Create(ctx context.Context, userID string, req dto.CreateTransactionRequest) (*dto.TransactionResponse, error) {
-	uID, err := uuid.Parse(userID)
-	if err != nil {
-		return nil, err
-	}
-
+	// Em produção, envolveríamos tudo em um db.BeginTx
+	uID, _ := uuid.Parse(userID)
 	aID, err := uuid.Parse(req.AccountID)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("invalid account id")
+	}
+
+	account, err := u.accountRepo.GetByID(ctx, req.AccountID)
+	if err != nil {
+		return nil, errors.New("account not found")
 	}
 
 	var cID *uuid.UUID
@@ -37,7 +41,18 @@ func (u *TransactionUseCase) Create(ctx context.Context, userID string, req dto.
 	}
 
 	transaction := entity.NewTransaction(uID, aID, cID, req.Amount, req.Description, req.Date, entity.TransactionType(req.Type))
+
+	if transaction.Type == entity.Income {
+		account.Balance += transaction.Amount
+	} else if transaction.Type == entity.Expense {
+		account.Balance -= transaction.Amount
+	}
+
 	if err := u.repo.Create(ctx, transaction); err != nil {
+		return nil, err
+	}
+
+	if err := u.accountRepo.Update(ctx, account); err != nil {
 		return nil, err
 	}
 

@@ -11,7 +11,8 @@ import (
 
 func TestTransactionUseCase_List(t *testing.T) {
 	repo := new(MockTransactionRepository)
-	useCase := NewTransactionUseCase(repo)
+	accRepo := new(MockAccountRepository)
+	useCase := NewTransactionUseCase(repo, accRepo)
 
 	userID := uuid.New().String()
 	repo.On("ListByUserID", mock.Anything, userID).Return([]*entity.Transaction{{Amount: 10.0}}, nil)
