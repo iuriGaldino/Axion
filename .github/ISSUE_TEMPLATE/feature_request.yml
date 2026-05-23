@@ -1,0 +1,11 @@
+name: Feature Request
+description: Sugerir uma nova funcionalidade
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Objetivo
+      description: O que esta funcionalidade deve resolver?
+    validations:
+      required: true

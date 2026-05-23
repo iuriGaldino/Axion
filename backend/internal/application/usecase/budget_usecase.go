@@ -9,8 +9,14 @@ import (
 )
 
 func (u *BudgetGoalUseCase) CreateBudget(ctx context.Context, userID string, req dto.CreateBudgetRequest) error {
-	uID, _ := uuid.Parse(userID)
-	cID, _ := uuid.Parse(req.CategoryID)
+	uID, err := uuid.Parse(userID)
+	if err != nil {
+		return err
+	}
+	cID, err := uuid.Parse(req.CategoryID)
+	if err != nil {
+		return err
+	}
 	budget := entity.NewBudget(uID, cID, req.Amount, req.Period, req.StartDate, req.EndDate)
 	return u.budgetRepo.Create(ctx, budget)
 }
@@ -23,8 +29,8 @@ func (u *BudgetGoalUseCase) MonitorBudgets(ctx context.Context, userID string) (
 
 	usage := make(map[string]float64)
 	for _, b := range budgets {
-		// Mock calculation for production-ready logic
-		usage[b.CategoryID.String()] = 0.75
+		// Em produção, aqui haveria uma query para somar transações do período
+		usage[b.CategoryID.String()] = 0.0
 	}
 	return usage, nil
 }
