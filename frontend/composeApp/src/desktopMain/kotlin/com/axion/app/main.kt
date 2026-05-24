@@ -9,7 +9,7 @@ fun main() {
     startKoin {
         modules(appModule)
     }
-
+    
     application {
         Window(onCloseRequest = ::exitApplication, title = "Axion") {
             App()

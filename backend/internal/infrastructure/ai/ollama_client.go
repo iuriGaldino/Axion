@@ -33,7 +33,7 @@ type OllamaResponse struct {
 
 func (c *OllamaClient) GenerateInsight(ctx context.Context, data string) (string, error) {
 	prompt := fmt.Sprintf("Analise estes dados financeiros e dê um insight curto e acionável: %s", data)
-
+	
 	reqBody := OllamaRequest{
 		Model:  c.model,
 		Prompt: prompt,

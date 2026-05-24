@@ -36,7 +36,7 @@ func (u *BudgetUseCase) MonitorBudgets(ctx context.Context, userID string) (map[
 	if err != nil {
 		return nil, err
 	}
-
+	
 	transactions, err := u.transactionRepo.ListByUserID(ctx, userID)
 	if err != nil {
 		return nil, err

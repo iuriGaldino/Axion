@@ -14,7 +14,7 @@ fun SettingsScreen() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text("Configurações", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(24.dp))
-
+        
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -22,14 +22,14 @@ fun SettingsScreen() {
             Text("Tema Escuro")
             Switch(checked = darkTheme, onCheckedChange = { darkTheme = it })
         }
-
+        
         Spacer(Modifier.height(16.dp))
-
+        
         Text("Idioma", style = MaterialTheme.typography.titleMedium)
         Text(language, style = MaterialTheme.typography.bodyMedium)
-
+        
         Spacer(Modifier.height(32.dp))
-
+        
         Button(onClick = {}, modifier = Modifier.fillMaxWidth()) {
             Text("Salvar Alterações")
         }
