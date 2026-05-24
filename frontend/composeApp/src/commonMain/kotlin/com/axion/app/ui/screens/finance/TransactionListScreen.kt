@@ -16,11 +16,11 @@ fun TransactionListScreen(transactions: List<Transaction>) {
             ListItem(
                 headlineContent = { Text(transaction.description) },
                 supportingContent = { Text(transaction.date) },
-                trailingContent = { 
+                trailingContent = {
                     Text(
                         "R$ ${transaction.amount}",
                         color = if (transaction.type == "income") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                    ) 
+                    )
                 }
             )
             HorizontalDivider()

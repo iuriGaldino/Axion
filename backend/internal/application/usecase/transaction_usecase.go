@@ -41,7 +41,7 @@ func (u *TransactionUseCase) Create(ctx context.Context, userID string, req dto.
 	}
 
 	transaction := entity.NewTransaction(uID, aID, cID, req.Amount, req.Description, req.Date, entity.TransactionType(req.Type))
-	
+
 	if transaction.Type == entity.Income {
 		account.Balance += transaction.Amount
 	} else if transaction.Type == entity.Expense {

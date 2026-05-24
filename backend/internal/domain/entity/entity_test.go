@@ -20,7 +20,7 @@ func TestNewUser(t *testing.T) {
 
 func TestGoal_CalculateProgress(t *testing.T) {
 	goal := NewGoal(uuid.New(), "Save for car", 10000, time.Now().AddDate(0, 6, 0))
-	
+
 	assert.Equal(t, 0.0, goal.CalculateProgress())
 
 	goal.CurrentAmount = 5000

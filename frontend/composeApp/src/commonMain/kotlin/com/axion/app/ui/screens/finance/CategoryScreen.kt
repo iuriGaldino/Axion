@@ -19,7 +19,7 @@ fun CategoryScreen(categories: List<Category>) {
                 ListItem(
                     headlineContent = { Text(category.name) },
                     supportingContent = { Text(if (category.isIncome) "Receita" else "Despesa") },
-                    trailingContent = { 
+                    trailingContent = {
                         Box(modifier = Modifier.size(24.dp)) // Placeholder para cor/ícone
                     }
                 )

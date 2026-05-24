@@ -19,11 +19,11 @@ func (o *TesseractOCR) ExtractText(imagePath string) (string, error) {
 	/*
 	client := gosseract.NewClient()
 	defer client.Close()
-	
+
 	if err := client.SetImage(imagePath); err != nil {
 		return "", err
 	}
-	
+
 	return client.Text()
 	*/
 	return "Simulated text extraction from " + imagePath, nil

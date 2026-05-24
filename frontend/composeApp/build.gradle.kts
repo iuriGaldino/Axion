@@ -14,9 +14,9 @@ kotlin {
             }
         }
     }
-    
+
     jvm("desktop")
-    
+
     sourceSets {
         val commonMain by getting {
             dependencies {
